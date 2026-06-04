@@ -71,7 +71,7 @@ public class EmployeeController {
                 status);
     }
 
-    @PatchMapping("/{employeeCode}")
+    @PatchMapping("/update/{employeeCode}")
     public Employee updateEmployee(
             @PathVariable String employeeCode,
             @RequestBody Employee employee) {
