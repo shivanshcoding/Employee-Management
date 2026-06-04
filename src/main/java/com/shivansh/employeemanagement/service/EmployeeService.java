@@ -34,6 +34,13 @@ public class EmployeeService {
                     "Company email already exists");
         }
 
+        if (repository.existsByPrivateEmail(
+                employee.getPrivateEmail())) {
+
+            throw new RuntimeException(
+                    "Private email already exists");
+        }
+
         return repository.save(employee);
     }
 
@@ -47,11 +54,26 @@ public class EmployeeService {
                 .orElse(null);
     }
 
-    public Employee getEmployeeByEmployeeCode(
+    public Employee getEmployeeByCode(
             String employeeCode) {
 
-        return repository.findByEmployeeCode(
-                        employeeCode)
+        Employee employee =
+                repository.findByEmployeeCode(employeeCode)
+                        .orElse(null);
+
+        if(employee == null){
+            throw new RuntimeException(
+                    "Employee not found");
+        }
+
+        return employee;
+    }
+
+    public Employee getEmployeeByCompanyEmail(
+            String companyEmail) {
+
+        return repository.findByCompanyEmail(
+                        companyEmail)
                 .orElse(null);
     }
 
@@ -73,12 +95,7 @@ public class EmployeeService {
             String employeeCode,
             Employee updatedEmployee) {
 
-        Employee employee = getEmployeeByEmployeeCode(employeeCode);
-
-        if (employee == null) {
-            throw new RuntimeException(
-                    "Employee not found");
-        }
+        Employee employee = getEmployeeByCode(employeeCode);
 
         if (updatedEmployee.getFirstName() != null) {
             employee.setFirstName(
@@ -95,12 +112,32 @@ public class EmployeeService {
                     updatedEmployee.getLastName());
         }
 
-        if (updatedEmployee.getPrivateEmail() != null) {
+        if (updatedEmployee.getPrivateEmail() != null &&
+                !updatedEmployee.getPrivateEmail()
+                        .equals(employee.getPrivateEmail())) {
+
+            if (repository.existsByPrivateEmail(
+                    updatedEmployee.getPrivateEmail())) {
+
+                throw new RuntimeException(
+                        "Private email already exists");
+            }
+
             employee.setPrivateEmail(
                     updatedEmployee.getPrivateEmail());
         }
 
-        if (updatedEmployee.getCompanyEmail() != null) {
+        if (updatedEmployee.getCompanyEmail() != null &&
+                !updatedEmployee.getCompanyEmail()
+                        .equals(employee.getCompanyEmail())) {
+
+            if (repository.existsByCompanyEmail(
+                    updatedEmployee.getCompanyEmail())) {
+
+                throw new RuntimeException(
+                        "Company email already exists");
+            }
+
             employee.setCompanyEmail(
                     updatedEmployee.getCompanyEmail());
         }
@@ -120,7 +157,17 @@ public class EmployeeService {
                     updatedEmployee.getDesignation());
         }
 
-        if (updatedEmployee.getPhoneNumber() != null) {
+        if (updatedEmployee.getPhoneNumber() != null &&
+                !updatedEmployee.getPhoneNumber()
+                        .equals(employee.getPhoneNumber())) {
+
+            if (repository.existsByPhoneNumber(
+                    updatedEmployee.getPhoneNumber())) {
+
+                throw new RuntimeException(
+                        "Phone number already exists");
+            }
+
             employee.setPhoneNumber(
                     updatedEmployee.getPhoneNumber());
         }
@@ -136,12 +183,5 @@ public class EmployeeService {
     public void deleteEmployeeById(UUID employeeId) {
         repository.deleteById(employeeId);
     }
-    public void deleteEmployeeByCode(String employeeCode) {
-        Employee employee = getEmployeeByEmployeeCode(employeeCode);
-        if (employee == null) {
-            throw new RuntimeException(
-                    "Employee not found");
-        }
-        repository.delete(employee);
-    }
+    public void deleteEmployeeByCode(String employeeCode) { repository.delete(getEmployeeByCode(employeeCode)); }
 }

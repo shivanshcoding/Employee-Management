@@ -21,6 +21,12 @@ public interface EmployeeRepository
     Optional<Employee> findByPrivateEmail(
             String privateEmail);
 
+    List<Employee> findByFirstName(
+            String firstName);
+
+    List<Employee> findByLastName(
+            String lastName);
+
     List<Employee> findByDepartment(
             Department department);
 
@@ -35,4 +41,6 @@ public interface EmployeeRepository
 
     boolean existsByPrivateEmail(
             String privateEmail);
+
+    boolean existsByPhoneNumber(String phoneNumber);
 }
