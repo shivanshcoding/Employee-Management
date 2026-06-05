@@ -3,6 +3,8 @@ package com.shivansh.employeemanagement.service;
 import com.shivansh.employeemanagement.entity.Department;
 import com.shivansh.employeemanagement.entity.Employee;
 import com.shivansh.employeemanagement.entity.EmploymentStatus;
+import com.shivansh.employeemanagement.exception.DuplicateResourceException;
+import com.shivansh.employeemanagement.exception.EmployeeNotFoundException;
 import com.shivansh.employeemanagement.repository.EmployeeRepository;
 import org.springframework.stereotype.Service;
 
@@ -20,25 +22,20 @@ public class EmployeeService {
 
     public Employee createEmployee(Employee employee) {
 
-        if (repository.existsByEmployeeCode(
-                employee.getEmployeeCode())) {
-
-            throw new RuntimeException(
-                    "Employee code already exists");
+        if (repository.existsByEmployeeCode(employee.getEmployeeCode())) {
+            throw new DuplicateResourceException("Employee already exists with this code");
         }
 
-        if (repository.existsByCompanyEmail(
-                employee.getCompanyEmail())) {
-
-            throw new RuntimeException(
-                    "Company email already exists");
+        if (repository.existsByCompanyEmail(employee.getCompanyEmail())) {
+            throw new DuplicateResourceException("Employee already exists with this company email");
         }
 
-        if (repository.existsByPrivateEmail(
-                employee.getPrivateEmail())) {
+        if (repository.existsByPrivateEmail(employee.getPrivateEmail())) {
+            throw new DuplicateResourceException("Employee already exists with this private email");
+        }
 
-            throw new RuntimeException(
-                    "Private email already exists");
+        if (repository.existsByPhoneNumber(employee.getPhoneNumber())){
+            throw new DuplicateResourceException("Employee already exists with this phone number");
         }
 
         return repository.save(employee);
@@ -46,12 +43,6 @@ public class EmployeeService {
 
     public List<Employee> getAllEmployees() {
         return repository.findAll();
-    }
-
-    public Employee getEmployeeById(UUID employeeId) {
-
-        return repository.findById(employeeId)
-                .orElse(null);
     }
 
     public Employee getEmployeeByCode(
@@ -62,33 +53,51 @@ public class EmployeeService {
                         .orElse(null);
 
         if(employee == null){
-            throw new RuntimeException(
-                    "Employee not found");
+            throw new EmployeeNotFoundException("Employee not found with this Code");
         }
 
         return employee;
     }
 
-    public Employee getEmployeeByCompanyEmail(
-            String companyEmail) {
+    public List<Employee> fetchEmployees(
+            String employeeCode,
+            String companyEmail,
+            String privateEmail,
+            Department department,
+            EmploymentStatus status
+    ) {
 
-        return repository.findByCompanyEmail(
-                        companyEmail)
-                .orElse(null);
-    }
+        List<Employee> employees =
+                repository.findAll();
 
-    public List<Employee> getEmployeesByDepartment(
-            Department department) {
+        return employees.stream()
 
-        return repository.findByDepartment(
-                department);
-    }
+                .filter(e ->
+                        employeeCode == null ||
+                                e.getEmployeeCode()
+                                        .equals(employeeCode))
 
-    public List<Employee> getEmployeesByStatus(
-            EmploymentStatus status) {
+                .filter(e ->
+                        companyEmail == null ||
+                                e.getCompanyEmail()
+                                        .equals(companyEmail))
 
-        return repository.findByStatus(
-                status);
+                .filter(e ->
+                        privateEmail == null ||
+                                e.getPrivateEmail()
+                                        .equals(privateEmail))
+
+                .filter(e ->
+                        department == null ||
+                                e.getDepartment()
+                                        .equals(department))
+
+                .filter(e ->
+                        status == null ||
+                                e.getStatus()
+                                        .equals(status))
+
+                .toList();
     }
 
     public Employee updateEmployee(
@@ -98,83 +107,61 @@ public class EmployeeService {
         Employee employee = getEmployeeByCode(employeeCode);
 
         if (updatedEmployee.getFirstName() != null) {
-            employee.setFirstName(
-                    updatedEmployee.getFirstName());
+            employee.setFirstName(updatedEmployee.getFirstName());
         }
 
         if (updatedEmployee.getMiddleName() != null) {
-            employee.setMiddleName(
-                    updatedEmployee.getMiddleName());
+            employee.setMiddleName(updatedEmployee.getMiddleName());
         }
 
         if (updatedEmployee.getLastName() != null) {
-            employee.setLastName(
-                    updatedEmployee.getLastName());
+            employee.setLastName(updatedEmployee.getLastName());
         }
 
         if (updatedEmployee.getPrivateEmail() != null &&
-                !updatedEmployee.getPrivateEmail()
-                        .equals(employee.getPrivateEmail())) {
+                !updatedEmployee.getPrivateEmail().equals(employee.getPrivateEmail())) {
 
-            if (repository.existsByPrivateEmail(
-                    updatedEmployee.getPrivateEmail())) {
-
-                throw new RuntimeException(
-                        "Private email already exists");
+            if (repository.existsByPrivateEmail(updatedEmployee.getPrivateEmail())) {
+                throw new DuplicateResourceException("Employee already exists with this private email");
             }
 
-            employee.setPrivateEmail(
-                    updatedEmployee.getPrivateEmail());
+            employee.setPrivateEmail(updatedEmployee.getPrivateEmail());
         }
 
         if (updatedEmployee.getCompanyEmail() != null &&
-                !updatedEmployee.getCompanyEmail()
-                        .equals(employee.getCompanyEmail())) {
+                !updatedEmployee.getCompanyEmail().equals(employee.getCompanyEmail())) {
 
-            if (repository.existsByCompanyEmail(
-                    updatedEmployee.getCompanyEmail())) {
-
-                throw new RuntimeException(
-                        "Company email already exists");
+            if (repository.existsByCompanyEmail(updatedEmployee.getCompanyEmail())) {
+                throw new DuplicateResourceException("Employee already exists with this company email");
             }
 
-            employee.setCompanyEmail(
-                    updatedEmployee.getCompanyEmail());
+            employee.setCompanyEmail(updatedEmployee.getCompanyEmail());
         }
 
         if (updatedEmployee.getDepartment() != null) {
-            employee.setDepartment(
-                    updatedEmployee.getDepartment());
+            employee.setDepartment(updatedEmployee.getDepartment());
         }
 
         if (updatedEmployee.getStatus() != null) {
-            employee.setStatus(
-                    updatedEmployee.getStatus());
+            employee.setStatus(updatedEmployee.getStatus());
         }
 
         if (updatedEmployee.getDesignation() != null) {
-            employee.setDesignation(
-                    updatedEmployee.getDesignation());
+            employee.setDesignation(updatedEmployee.getDesignation());
         }
 
         if (updatedEmployee.getPhoneNumber() != null &&
-                !updatedEmployee.getPhoneNumber()
-                        .equals(employee.getPhoneNumber())) {
+                !updatedEmployee.getPhoneNumber().equals(employee.getPhoneNumber())) {
 
-            if (repository.existsByPhoneNumber(
-                    updatedEmployee.getPhoneNumber())) {
-
-                throw new RuntimeException(
-                        "Phone number already exists");
+            if (repository.existsByPhoneNumber(updatedEmployee.getPhoneNumber())) {
+                throw new DuplicateResourceException("Employee already exists with this phone number");
             }
 
-            employee.setPhoneNumber(
-                    updatedEmployee.getPhoneNumber());
+            employee.setPhoneNumber(updatedEmployee.getPhoneNumber());
         }
 
         if (updatedEmployee.getSalary() != null) {
-            employee.setSalary(
-                    updatedEmployee.getSalary());
+            employee.setSalary(updatedEmployee.getSalary());
         }
 
         return repository.save(employee);

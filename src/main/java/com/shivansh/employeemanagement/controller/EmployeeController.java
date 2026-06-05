@@ -1,10 +1,12 @@
 package com.shivansh.employeemanagement.controller;
 
+import com.shivansh.employeemanagement.entity.ApiResponse;
 import com.shivansh.employeemanagement.entity.Department;
 import com.shivansh.employeemanagement.entity.Employee;
 import com.shivansh.employeemanagement.entity.EmploymentStatus;
 import com.shivansh.employeemanagement.service.EmployeeService;
 import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,64 +23,92 @@ public class EmployeeController {
     }
 
     @PostMapping
-    public Employee createEmployee(
-            @Valid @RequestBody Employee employee) {
+    public ResponseEntity<ApiResponse<Employee>> createEmployee(
+            @Valid @RequestBody Employee employeeData) {
 
-        return service.createEmployee(employee);
+        Employee newEmployeeCreated = service.createEmployee(employeeData);
+        ApiResponse<Employee> response =
+                new ApiResponse<>(
+                        true,
+                        "Employee created successfully",
+                        newEmployeeCreated);
+
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping
-    public List<Employee> getAllEmployees() {
+    public ResponseEntity<ApiResponse<List<Employee>>> getAllEmployees() {
+        ApiResponse<List<Employee>> response =
+                new ApiResponse<>(
+                        true,
+                        "Employee fetched successfully",
+                        service.getAllEmployees());
 
-        return service.getAllEmployees();
+        return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/id/{employeeId}")
-    public Employee getEmployeeById(
-            @PathVariable UUID employeeId) {
-
-        return service.getEmployeeById(employeeId);
-    }
-
-    @GetMapping("/code/{employeeCode}")
-    public Employee getEmployeeByCode(
+    @GetMapping("/fetch/{employeeCode}")
+    public ResponseEntity<ApiResponse<Employee>> getEmployeeByCode(
             @PathVariable String employeeCode) {
+        ApiResponse<Employee> response =
+                new ApiResponse<>(
+                        true,
+                        "Employee fetched successfully",
+                        service.getEmployeeByCode(employeeCode));
 
-        return service.getEmployeeByCode(employeeCode);
+        return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/email/{companyEmail}")
-    public Employee getEmployeeByCompanyEmail(
-            @PathVariable String companyEmail) {
+    @GetMapping("/fetch")
+    public ResponseEntity<ApiResponse<List<Employee>>> getEmployee(
+            @RequestParam(required = false)
+            String employeeCode,
 
-        return service.getEmployeeByCompanyEmail(
-                companyEmail);
-    }
+            @RequestParam(required = false)
+            String companyEmail,
 
-    @GetMapping("/department/{department}")
-    public List<Employee> getEmployeesByDepartment(
-            @PathVariable Department department) {
+            @RequestParam(required = false)
+            String privateEmail,
 
-        return service.getEmployeesByDepartment(
-                department);
-    }
+            @RequestParam(required = false)
+            Department department,
 
-    @GetMapping("/status/{status}")
-    public List<Employee> getEmployeesByStatus(
-            @PathVariable EmploymentStatus status) {
+            @RequestParam(required = false)
+            EmploymentStatus status
+    ){
 
-        return service.getEmployeesByStatus(
-                status);
+        List<Employee> fetchedEmployees =  service.fetchEmployees(
+                employeeCode,
+                companyEmail,
+                privateEmail,
+                department,
+                status
+        );
+
+        ApiResponse<List<Employee>> response =
+                new ApiResponse<>(
+                        true,
+                        "Employee fetched successfully",
+                        fetchedEmployees);
+
+        return ResponseEntity.ok(response);
+
     }
 
     @PatchMapping("/update/{employeeCode}")
-    public Employee updateEmployee(
+    public ResponseEntity<ApiResponse<Employee>> updateEmployee(
             @PathVariable String employeeCode,
             @RequestBody Employee employee) {
 
-        return service.updateEmployee(
-                employeeCode,
-                employee);
+        ApiResponse<Employee> response =
+                new ApiResponse<>(
+                        true,
+                        "Employee updated successfully",
+                        service.updateEmployee(
+                                employeeCode,
+                                employee));
+
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/id/{employeeId}")
