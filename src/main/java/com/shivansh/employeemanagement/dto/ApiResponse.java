@@ -1,4 +1,4 @@
-package com.shivansh.employeemanagement.entity;
+package com.shivansh.employeemanagement.dto;
 
 public class ApiResponse<T> {
 

@@ -164,6 +164,14 @@ public class EmployeeService {
             employee.setSalary(updatedEmployee.getSalary());
         }
 
+        if (updatedEmployee.getExitDate() != null &&
+                (employee.getStatus() == EmploymentStatus.RESIGNED ||
+                        employee.getStatus() == EmploymentStatus.TERMINATED)) {
+
+            employee.setExitDate(
+                    updatedEmployee.getExitDate());
+        }
+
         return repository.save(employee);
     }
 

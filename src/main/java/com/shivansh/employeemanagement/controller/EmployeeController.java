@@ -1,6 +1,6 @@
 package com.shivansh.employeemanagement.controller;
 
-import com.shivansh.employeemanagement.entity.ApiResponse;
+import com.shivansh.employeemanagement.dto.ApiResponse;
 import com.shivansh.employeemanagement.entity.Department;
 import com.shivansh.employeemanagement.entity.Employee;
 import com.shivansh.employeemanagement.entity.EmploymentStatus;
@@ -10,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/employees")
@@ -111,16 +110,7 @@ public class EmployeeController {
         return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("/id/{employeeId}")
-    public String deleteEmployeeById(
-            @PathVariable UUID employeeId) {
-
-        service.deleteEmployeeById(employeeId);
-
-        return "Employee deleted successfully";
-    }
-
-    @DeleteMapping("/code/{employeeCode}")
+    @DeleteMapping("/delete/{employeeCode}")
     public String deleteEmployeeByCode(
             @PathVariable String employeeCode) {
 
