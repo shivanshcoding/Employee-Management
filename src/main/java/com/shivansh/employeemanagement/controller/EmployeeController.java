@@ -23,7 +23,7 @@ public class EmployeeController {
         this.service = service;
     }
 
-    @PostMapping
+    @PostMapping("/create")
     public ResponseEntity<ApiResponse<Employee>> createEmployee(
             @Valid @RequestBody CreateEmployeeRequest employeeData) {
 
@@ -66,7 +66,10 @@ public class EmployeeController {
             Department department,
 
             @RequestParam(required = false)
-            EmploymentStatus status
+            EmploymentStatus status,
+
+            @RequestParam(required = false, defaultValue = "false")
+            boolean includeTerminated
     ){
 
         List<Employee> fetchedEmployees =  service.fetchEmployees(
@@ -74,7 +77,8 @@ public class EmployeeController {
                 companyEmail,
                 privateEmail,
                 department,
-                status
+                status,
+                includeTerminated
         );
 
         ApiResponse<List<Employee>> response =

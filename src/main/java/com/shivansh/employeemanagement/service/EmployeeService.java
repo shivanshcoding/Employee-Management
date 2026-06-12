@@ -63,7 +63,8 @@ public class EmployeeService {
             String companyEmail,
             String privateEmail,
             Department department,
-            EmploymentStatus status
+            EmploymentStatus status,
+            boolean includeTerminated
     ) {
 
         List<Employee> employees =
@@ -94,7 +95,7 @@ public class EmployeeService {
                                 e.getStatus()
                                         .equals(status))
                 .filter(e ->
-                        e.getStatus()
+                        includeTerminated || e.getStatus()
                                 != EmploymentStatus.TERMINATED)
 
                 .toList();
@@ -157,7 +158,7 @@ public class EmployeeService {
         if (updatedEmployee.getStatus() != null) {
             if (updatedEmployee.getStatus() == EmploymentStatus.TERMINATED) {
                 throw new BadRequestException(
-                        "Can't update status to TERMINATED or RESIGNED from here, do a delete request instead");
+                        "Can't update status to TERMINATED from here, do a delete request instead");
             }else{
                 employee.setStatus(updatedEmployee.getStatus());
             }
@@ -187,8 +188,10 @@ public class EmployeeService {
     public Employee softDeleteEmployeeByCode(
             String employeeCode) {
 
-        Employee employee =
-                getEmployeeByCode(employeeCode);
+        Employee employee = getEmployeeByCode(employeeCode);
+        if(employee.getStatus() == EmploymentStatus.TERMINATED){
+            throw new BadRequestException("Employee is already terminated");
+        }
 
         employee.setStatus(
                 EmploymentStatus.TERMINATED);
@@ -201,16 +204,13 @@ public class EmployeeService {
 
     public Employee restoreEmployeeByCode(
             String employeeCode) {
-
-        Employee employee =
-                getEmployeeByCode(employeeCode);
-
-        employee.setStatus(
-                EmploymentStatus.ACTIVE);
-
-        employee.setExitDate(null);
-
-        return repository.save(employee);
+        Employee employee = getEmployeeByCode(employeeCode);
+        if(employee.getStatus() == EmploymentStatus.TERMINATED){
+            employee.setStatus(EmploymentStatus.ACTIVE);
+            employee.setExitDate(null);
+            return repository.save(employee);
+        }
+        throw new BadRequestException("Employee is not terminated");
     }
 
     public void hardDeleteEmployeeByCode(

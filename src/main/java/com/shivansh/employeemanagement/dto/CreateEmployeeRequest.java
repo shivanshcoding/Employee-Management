@@ -44,5 +44,6 @@ public class CreateEmployeeRequest {
     @NotBlank(message = "Phone number is required")
     private String phoneNumber;
 
+    @NotNull(message = "Joining Date cannot be null")
     private LocalDate joiningDate;
 }

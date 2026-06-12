@@ -69,7 +69,7 @@ public class Employee {
         this.designation = request.getDesignation();
         this.salary = request.getSalary();
         this.phoneNumber = request.getPhoneNumber();
-        this.joiningDate = request.getJoiningDate();
+        this.joiningDate = request.getJoiningDate() ;
         this.exitDate = null;
     }
 }
