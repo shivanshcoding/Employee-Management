@@ -1,10 +1,15 @@
 package com.shivansh.employeemanagement.entity;
 
+import com.shivansh.employeemanagement.dto.CreateEmployeeRequest;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDate;
 import java.util.UUID;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "employees")
 public class Employee {
@@ -43,7 +48,6 @@ public class Employee {
     }
 
     public String getFullName() {
-
         if (middleName == null || middleName.isBlank()) {
             return firstName + " " + lastName;
         }
@@ -53,109 +57,19 @@ public class Employee {
                 lastName;
     }
 
-    public UUID getEmployeeId() {
-        return employeeId;
-    }
-
-    public void setEmployeeId(UUID id) {
-        this.employeeId = id;
-    }
-
-    public String getEmployeeCode() {
-        return employeeCode;
-    }
-
-    public Department getDepartment() {
-        return department;
-    }
-
-    public void setDepartment(Department department) {
-        this.department = department;
-    }
-
-    public EmploymentStatus getStatus() { return status; }
-
-    public void setStatus(EmploymentStatus status) {
-        this.status = status;
-    }
-
-    public String getDesignation() {
-        return designation;
-    }
-
-    public void setDesignation(String designation) {
-        this.designation = designation;
-    }
-
-    public Double getSalary() {
-        return salary;
-    }
-
-    public void setSalary(Double salary) {
-        this.salary = salary;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getMiddleName() {
-        return middleName;
-    }
-
-    public void setMiddleName(String middleName) {
-        this.middleName = middleName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public String getPrivateEmail() {
-        return privateEmail;
-    }
-
-    public void setPrivateEmail(String privateEmail) {
-        this.privateEmail = privateEmail;
-    }
-
-    public String getCompanyEmail() {
-        return companyEmail;
-    }
-
-    public void setCompanyEmail(String companyEmail) {
-        this.companyEmail = companyEmail;
-    }
-
-    public LocalDate getJoiningDate() {
-        return joiningDate;
-    }
-
-    public void setJoiningDate(LocalDate joiningDate) {
-        this.joiningDate = joiningDate;
-    }
-
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
-
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
-    }
-
-    public LocalDate getExitDate() {
-        return exitDate;
-    }
-
-    public void setExitDate(LocalDate exitDate) {
-        this.exitDate = exitDate;
+    public Employee(CreateEmployeeRequest request) {
+        this.employeeCode = request.getEmployeeCode();
+        this.firstName = request.getFirstName();
+        this.middleName = request.getMiddleName();
+        this.lastName = request.getLastName();
+        this.companyEmail = request.getCompanyEmail();
+        this.privateEmail = request.getPrivateEmail();
+        this.department = request.getDepartment();
+        this.status = EmploymentStatus.ACTIVE;
+        this.designation = request.getDesignation();
+        this.salary = request.getSalary();
+        this.phoneNumber = request.getPhoneNumber();
+        this.joiningDate = request.getJoiningDate();
+        this.exitDate = null;
     }
 }

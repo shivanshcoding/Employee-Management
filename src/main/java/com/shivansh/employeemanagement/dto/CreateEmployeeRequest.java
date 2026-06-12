@@ -3,7 +3,13 @@ package com.shivansh.employeemanagement.dto;
 import com.shivansh.employeemanagement.entity.Department;
 import com.shivansh.employeemanagement.entity.EmploymentStatus;
 import jakarta.validation.constraints.*;
+import lombok.Getter;
+import lombok.Setter;
 
+import java.time.LocalDate;
+
+@Getter
+@Setter
 public class CreateEmployeeRequest {
 
     @NotBlank(message = "Employee code is required")
@@ -11,6 +17,8 @@ public class CreateEmployeeRequest {
 
     @NotBlank(message = "First name is required")
     private String firstName;
+
+    private String middleName;
 
     @NotBlank(message = "Last name is required")
     private String lastName;
@@ -26,9 +34,6 @@ public class CreateEmployeeRequest {
     @NotNull(message = "Department is required")
     private Department department;
 
-    @NotNull(message = "Status is required")
-    private EmploymentStatus status;
-
     @NotBlank(message = "Designation is required")
     private String designation;
 
@@ -39,5 +44,5 @@ public class CreateEmployeeRequest {
     @NotBlank(message = "Phone number is required")
     private String phoneNumber;
 
-    // getters setters
+    private LocalDate joiningDate;
 }

@@ -1,11 +1,13 @@
 package com.shivansh.employeemanagement.controller;
 
 import com.shivansh.employeemanagement.dto.ApiResponse;
+import com.shivansh.employeemanagement.dto.CreateEmployeeRequest;
 import com.shivansh.employeemanagement.entity.Department;
 import com.shivansh.employeemanagement.entity.Employee;
 import com.shivansh.employeemanagement.entity.EmploymentStatus;
 import com.shivansh.employeemanagement.service.EmployeeService;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,7 +25,7 @@ public class EmployeeController {
 
     @PostMapping
     public ResponseEntity<ApiResponse<Employee>> createEmployee(
-            @Valid @RequestBody Employee employeeData) {
+            @Valid @RequestBody CreateEmployeeRequest employeeData) {
 
         Employee newEmployeeCreated = service.createEmployee(employeeData);
         ApiResponse<Employee> response =
@@ -32,18 +34,9 @@ public class EmployeeController {
                         "Employee created successfully",
                         newEmployeeCreated);
 
-        return ResponseEntity.ok(response);
-    }
-
-    @GetMapping
-    public ResponseEntity<ApiResponse<List<Employee>>> getAllEmployees() {
-        ApiResponse<List<Employee>> response =
-                new ApiResponse<>(
-                        true,
-                        "Employee fetched successfully",
-                        service.getAllEmployees());
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(response);
     }
 
     @GetMapping("/fetch/{employeeCode}")
@@ -94,6 +87,22 @@ public class EmployeeController {
 
     }
 
+    @GetMapping("/fetch/prefix")
+    public ResponseEntity<ApiResponse<List<Employee>>>
+    getEmployeesByPrefix(
+            @RequestParam(required = true)
+            String prefix
+    ) {
+        List<Employee> employees= service.getEmployeesByPrefix(prefix);
+
+        ApiResponse<List<Employee>> response =
+                new ApiResponse<>(
+                        true,
+                        "Employees Found Successfully",
+                        employees);
+        return ResponseEntity.ok(response);
+    }
+
     @PatchMapping("/update/{employeeCode}")
     public ResponseEntity<ApiResponse<Employee>> updateEmployee(
             @PathVariable String employeeCode,
@@ -111,11 +120,57 @@ public class EmployeeController {
     }
 
     @DeleteMapping("/delete/{employeeCode}")
-    public String deleteEmployeeByCode(
+    public ResponseEntity<ApiResponse<Employee>>
+    softDeleteEmployeeByCode(
             @PathVariable String employeeCode) {
 
-        service.deleteEmployeeByCode(employeeCode);
+        Employee employee =
+                service.softDeleteEmployeeByCode(
+                        employeeCode);
 
-        return "Employee deleted successfully";
+        ApiResponse<Employee> response =
+                new ApiResponse<>(
+                        true,
+                        "Employee terminated successfully",
+                        employee);
+
+        return ResponseEntity.ok(response);
     }
+
+    @PatchMapping("/restore/{employeeCode}")
+    public ResponseEntity<ApiResponse<Employee>>
+    restoreEmployeeByCode(
+            @PathVariable String employeeCode) {
+
+        Employee employee =
+                service.restoreEmployeeByCode(
+                        employeeCode);
+
+        ApiResponse<Employee> response =
+                new ApiResponse<>(
+                        true,
+                        "Employee restored successfully",
+                        employee);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/hard-delete/{employeeCode}")
+    public ResponseEntity<ApiResponse<Void>>
+    hardDeleteEmployeeByCode(
+            @PathVariable String employeeCode) {
+
+
+        service.hardDeleteEmployeeByCode(
+                        employeeCode);
+
+        ApiResponse<Void> response =
+                new ApiResponse<>(
+                        true,
+                        "Employee deleted successfully",
+                        null);
+
+        return ResponseEntity.ok(response);
+    }
+
 }

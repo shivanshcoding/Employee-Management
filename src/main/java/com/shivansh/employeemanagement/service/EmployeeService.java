@@ -1,15 +1,18 @@
 package com.shivansh.employeemanagement.service;
 
+import com.shivansh.employeemanagement.dto.CreateEmployeeRequest;
 import com.shivansh.employeemanagement.entity.Department;
 import com.shivansh.employeemanagement.entity.Employee;
 import com.shivansh.employeemanagement.entity.EmploymentStatus;
+import com.shivansh.employeemanagement.exception.BadRequestException;
 import com.shivansh.employeemanagement.exception.DuplicateResourceException;
 import com.shivansh.employeemanagement.exception.EmployeeNotFoundException;
+import com.shivansh.employeemanagement.exception.EmployeeTerminatedException;
 import com.shivansh.employeemanagement.repository.EmployeeRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
-import java.util.UUID;
 
 @Service
 public class EmployeeService {
@@ -20,7 +23,7 @@ public class EmployeeService {
         this.repository = repository;
     }
 
-    public Employee createEmployee(Employee employee) {
+    public Employee createEmployee(CreateEmployeeRequest employee) {
 
         if (repository.existsByEmployeeCode(employee.getEmployeeCode())) {
             throw new DuplicateResourceException("Employee already exists with this code");
@@ -38,11 +41,7 @@ public class EmployeeService {
             throw new DuplicateResourceException("Employee already exists with this phone number");
         }
 
-        return repository.save(employee);
-    }
-
-    public List<Employee> getAllEmployees() {
-        return repository.findAll();
+        return repository.save(new Employee(employee));
     }
 
     public Employee getEmployeeByCode(
@@ -68,9 +67,7 @@ public class EmployeeService {
     ) {
 
         List<Employee> employees =
-                repository.findAll();
-
-        return employees.stream()
+                repository.findAll().stream()
 
                 .filter(e ->
                         employeeCode == null ||
@@ -96,15 +93,30 @@ public class EmployeeService {
                         status == null ||
                                 e.getStatus()
                                         .equals(status))
+                .filter(e ->
+                        e.getStatus()
+                                != EmploymentStatus.TERMINATED)
 
                 .toList();
+        if(employees.isEmpty()){
+            throw new EmployeeNotFoundException("No Employee found");
+        }
+        return employees;
     }
 
     public Employee updateEmployee(
             String employeeCode,
             Employee updatedEmployee) {
-
         Employee employee = getEmployeeByCode(employeeCode);
+
+        if (employee.getStatus() == EmploymentStatus.TERMINATED ||
+                employee.getStatus() == EmploymentStatus.RESIGNED) {
+
+            throw new EmployeeTerminatedException(
+                    "Employee has been terminated, restore the Employee first if you want to update",
+                    employee
+            );
+        }
 
         if (updatedEmployee.getFirstName() != null) {
             employee.setFirstName(updatedEmployee.getFirstName());
@@ -143,7 +155,12 @@ public class EmployeeService {
         }
 
         if (updatedEmployee.getStatus() != null) {
-            employee.setStatus(updatedEmployee.getStatus());
+            if (updatedEmployee.getStatus() == EmploymentStatus.TERMINATED) {
+                throw new BadRequestException(
+                        "Can't update status to TERMINATED or RESIGNED from here, do a delete request instead");
+            }else{
+                employee.setStatus(updatedEmployee.getStatus());
+            }
         }
 
         if (updatedEmployee.getDesignation() != null) {
@@ -164,19 +181,63 @@ public class EmployeeService {
             employee.setSalary(updatedEmployee.getSalary());
         }
 
-        if (updatedEmployee.getExitDate() != null &&
-                (employee.getStatus() == EmploymentStatus.RESIGNED ||
-                        employee.getStatus() == EmploymentStatus.TERMINATED)) {
+        return repository.save(employee);
+    }
 
-            employee.setExitDate(
-                    updatedEmployee.getExitDate());
-        }
+    public Employee softDeleteEmployeeByCode(
+            String employeeCode) {
+
+        Employee employee =
+                getEmployeeByCode(employeeCode);
+
+        employee.setStatus(
+                EmploymentStatus.TERMINATED);
+
+        employee.setExitDate(
+                LocalDate.now());
 
         return repository.save(employee);
     }
 
-    public void deleteEmployeeById(UUID employeeId) {
-        repository.deleteById(employeeId);
+    public Employee restoreEmployeeByCode(
+            String employeeCode) {
+
+        Employee employee =
+                getEmployeeByCode(employeeCode);
+
+        employee.setStatus(
+                EmploymentStatus.ACTIVE);
+
+        employee.setExitDate(null);
+
+        return repository.save(employee);
     }
-    public void deleteEmployeeByCode(String employeeCode) { repository.delete(getEmployeeByCode(employeeCode)); }
+
+    public void hardDeleteEmployeeByCode(
+            String employeeCode) {
+
+        Employee employee =
+                getEmployeeByCode(employeeCode);
+
+        repository.delete(employee);
+    }
+
+    public List<Employee> getEmployeesByPrefix(
+            String prefix) {
+
+        List<Employee> employees =
+                repository.getEmployeesWhoseNameStartsWith(prefix)
+                        .stream()
+                        .filter(e ->
+                                e.getStatus()
+                                        != EmploymentStatus.TERMINATED)
+                        .toList();
+
+        if (employees.isEmpty()) {
+            throw new EmployeeNotFoundException(
+                    "No employee found");
+        }
+
+        return employees;
+    }
 }
