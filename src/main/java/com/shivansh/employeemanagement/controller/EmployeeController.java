@@ -2,6 +2,7 @@ package com.shivansh.employeemanagement.controller;
 
 import com.shivansh.employeemanagement.dto.ApiResponse;
 import com.shivansh.employeemanagement.dto.CreateEmployeeRequest;
+import com.shivansh.employeemanagement.dto.UpdateEmployeeRequest;
 import com.shivansh.employeemanagement.entity.Department;
 import com.shivansh.employeemanagement.entity.Employee;
 import com.shivansh.employeemanagement.entity.EmploymentStatus;
@@ -110,7 +111,7 @@ public class EmployeeController {
     @PatchMapping("/update/{employeeCode}")
     public ResponseEntity<ApiResponse<Employee>> updateEmployee(
             @PathVariable String employeeCode,
-            @RequestBody Employee employee) {
+            @RequestBody UpdateEmployeeRequest employee) {
 
         ApiResponse<Employee> response =
                 new ApiResponse<>(

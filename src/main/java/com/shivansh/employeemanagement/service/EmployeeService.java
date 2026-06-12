@@ -1,6 +1,7 @@
 package com.shivansh.employeemanagement.service;
 
 import com.shivansh.employeemanagement.dto.CreateEmployeeRequest;
+import com.shivansh.employeemanagement.dto.UpdateEmployeeRequest;
 import com.shivansh.employeemanagement.entity.Department;
 import com.shivansh.employeemanagement.entity.Employee;
 import com.shivansh.employeemanagement.entity.EmploymentStatus;
@@ -107,7 +108,7 @@ public class EmployeeService {
 
     public Employee updateEmployee(
             String employeeCode,
-            Employee updatedEmployee) {
+            UpdateEmployeeRequest updatedEmployee) {
         Employee employee = getEmployeeByCode(employeeCode);
 
         if (employee.getStatus() == EmploymentStatus.TERMINATED ||
