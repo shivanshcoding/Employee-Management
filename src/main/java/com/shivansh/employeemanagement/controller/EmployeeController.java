@@ -94,7 +94,7 @@ public class EmployeeController {
     @GetMapping("/fetch/prefix")
     public ResponseEntity<ApiResponse<List<Employee>>>
     getEmployeesByPrefix(
-            @RequestParam(required = true)
+            @RequestParam()
             String prefix
     ) {
         List<Employee> employees= service.getEmployeesByPrefix(prefix);

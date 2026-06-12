@@ -4,6 +4,7 @@ import com.shivansh.employeemanagement.dto.ApiResponse;
 import com.shivansh.employeemanagement.entity.Employee;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
@@ -120,4 +121,19 @@ public class GlobalExceptionHandler {
                 .body(response);
     }
 
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiResponse<Void>>
+    handleInvalidJson(
+            HttpMessageNotReadableException ex) {
+
+        ApiResponse<Void> response =
+                new ApiResponse<>(
+                        false,
+                        "Invalid request body. Please check JSON format and field values.",
+                        null);
+
+        return ResponseEntity
+                .badRequest()
+                .body(response);
+    }
 }
